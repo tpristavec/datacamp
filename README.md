@@ -1,2 +1,2 @@
-# Datacamp
-Completed Datacamp projects.
+# Fun with data
+Completed Datacamp, Kaggle, and TidyTuesday projects.
