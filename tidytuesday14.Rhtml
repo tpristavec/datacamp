@@ -1,0 +1,43 @@
+# TidyTuesday Week 14
+
+# Loading libraries
+library(readr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(ggthemes)
+
+# Reading in data
+life <- read_csv("https://github.com/rfordatascience/tidytuesday/raw/master/data/week14_global_life_expectancy.csv")
+
+# Selecting rows for former Yugoslavia
+exyu <- filter(life, country == "Bosnia and Herzegovina" | country == "Croatia" | country == "Macedonia" | 
+        country == "Montenegro" | country == "Serbia (including Kosovo)" | country == "Slovenia")
+
+# Plotting absolute life expectancy by country
+plot_abs <- ggplot(exyu, aes(x = year, y = life_expectancy, group = country, colour = country)) + 
+   geom_line() + 
+   labs(title = "Life expectancy in former Yugoslavia over time", x = "Year", y = "Life expectancy (years)", colour = "Country") +
+   theme_igray() + scale_colour_pander() +
+   scale_x_continuous(breaks = seq(min(exyu$year), max(exyu$year), by = 5)) +
+   scale_y_continuous(breaks = seq(round(min(exyu$life_expectancy), 0), round(max(exyu$life_expectancy), 0), by = 5)) + 
+   theme(axis.text.x = element_text(angle = 90)) 
+
+ggsave("plot_abs.png", plot = last_plot(), device = "png", dpi = 300)
+
+# Plotting percent change in life expectancy by country
+exyu1 <- exyu %>% 
+  group_by(country) %>%
+  mutate(pct_change = (life_expectancy/lag(life_expectancy) - 1) * 100) %>%
+  filter(year > 1951)
+
+plot_pct <- ggplot(exyu1, aes(x = year, y = pct_change, group = country, colour = country)) + 
+  geom_line() + 
+  labs(title = "Percent change in life expectancy in former Yugoslavia over time", x = "Year", y = "% change in life expectancy", colour = "Country") +
+  theme_igray() + scale_colour_pander() +
+  scale_x_continuous(breaks = seq(min(exyu1$year), max(exyu1$year), by = 5)) +
+  scale_y_continuous(breaks = seq(round(min(exyu1$pct_change), 1), round(max(exyu1$pct_change), 1), by = 0.2)) +
+  theme(axis.text.x = element_text(angle = 90))
+plot_pct
+
+ggsave("plot_pct.png", plot = last_plot(), device = "png", dpi = 300)
